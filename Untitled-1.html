@@ -1,0 +1,1637 @@
+<!doctype html>
+<html lang="vi" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuizTDV - Nền tảng ôn tập thông minh & Chia sẻ đám mây</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              darkBg: "#0b0f19",
+              darkCard: "#131c2e",
+              darkBorder: "#1e293b",
+              brandAccent: "#818cf8",
+              brandHover: "#6366f1",
+            },
+          },
+        },
+      };
+    </script>
+    <!-- Font Inter & FontAwesome Icons -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0b0f19;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #1e293b;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #334155;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-darkBg text-slate-100 min-h-screen flex flex-col antialiased selection:bg-brandAccent selection:text-white"
+  >
+    <!-- HEADER / NAVIGATION -->
+    <header
+      class="border-b border-darkBorder bg-darkCard/80 backdrop-blur sticky top-0 z-50"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
+      >
+        <div
+          class="flex items-center space-x-3 cursor-pointer"
+          onclick="app.goHome()"
+        >
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brandAccent to-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20"
+          >
+            <i class="fa-solid fa-graduation-cap text-white text-lg"></i>
+          </div>
+          <div>
+            <span
+              class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-brandAccent bg-clip-text text-transparent"
+              >QuizTDV</span
+            >
+            <span
+              class="block text-[10px] text-indigo-400 font-semibold uppercase tracking-wider"
+              >Ultimate Study Engine</span
+            >
+          </div>
+        </div>
+        <div class="flex items-center space-x-3">
+          <button
+            onclick="app.openDeployGuideModal()"
+            class="hidden sm:flex px-3.5 py-2 bg-darkCard border border-darkBorder hover:bg-darkBorder text-indigo-300 text-xs font-semibold rounded-xl transition items-center space-x-2"
+          >
+            <i class="fa-solid fa-cloud-arrow-up text-brandAccent"></i>
+            <span>Cách lên web & Lưu dự án</span>
+          </button>
+          <button
+            onclick="app.openShareModal()"
+            class="px-3.5 py-2 bg-darkCard border border-darkBorder hover:bg-darkBorder text-slate-300 text-xs sm:text-sm font-semibold rounded-xl transition flex items-center space-x-2"
+          >
+            <i class="fa-solid fa-share-nodes text-brandAccent"></i>
+            <span>Mã tài khoản</span>
+          </button>
+          <button
+            onclick="app.openCreateModal()"
+            class="px-4 py-2 bg-brandAccent hover:bg-brandHover text-white text-xs sm:text-sm font-semibold rounded-xl transition shadow-lg shadow-indigo-500/20 flex items-center space-x-2"
+          >
+            <i class="fa-solid fa-plus"></i>
+            <span>Tạo học phần</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- VIEW 1: HOME / DASHBOARD (DANH SÁCH HỌC PHẦN) -->
+      <section id="view-home" class="space-y-6">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        >
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Học phần đám mây QuizTDV
+            </h1>
+            <p class="text-slate-400 text-sm mt-1">
+              Đồng bộ trực tuyến thời gian thực. Tự tạo học phần hoặc nhập mã
+              chia sẻ từ bạn bè.
+            </p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="relative flex-1 sm:w-64">
+              <i
+                class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
+              ></i>
+              <input
+                type="text"
+                id="search-input"
+                oninput="app.handleSearch(this.value)"
+                placeholder="Tìm kiếm học phần..."
+                class="w-full bg-darkCard border border-darkBorder rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-brandAccent transition"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs chọn xem học phần cá nhân hay cộng đồng -->
+        <div
+          class="flex items-center justify-between flex-wrap gap-3 border-b border-darkBorder pb-3"
+        >
+          <div class="flex items-center space-x-2">
+            <button
+              onclick="app.switchTab('my')"
+              id="tab-my"
+              class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-brandAccent text-white shadow-lg shadow-indigo-500/20"
+            >
+              Học phần của tôi
+            </button>
+            <button
+              onclick="app.switchTab('public')"
+              id="tab-public"
+              class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-darkCard border border-darkBorder text-slate-400 hover:text-white"
+            >
+              Kho chung cộng đồng
+            </button>
+          </div>
+          <button
+            onclick="app.openDeployGuideModal()"
+            class="sm:hidden text-xs text-indigo-300 bg-indigo-500/10 border border-indigo-500/30 px-3 py-2 rounded-xl font-semibold flex items-center space-x-1.5"
+          >
+            <i class="fa-solid fa-circle-question"></i
+            ><span>Hướng dẫn đưa lên web</span>
+          </button>
+        </div>
+
+        <!-- Grid danh sách học phần -->
+        <div
+          id="projects-grid"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+        >
+          <!-- Nội dung được render bằng JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 2: CHI TIẾT HỌC PHẦN & CHẾ ĐỘ ÔN TẬP -->
+      <section id="view-detail" class="hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <button
+            onclick="app.goHome()"
+            class="text-sm font-medium text-slate-400 hover:text-white flex items-center space-x-2 transition"
+          >
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Quay lại danh sách</span>
+          </button>
+          <div class="flex items-center space-x-2" id="detail-action-buttons">
+            <!-- Render nút sửa/xóa dựa trên quyền sở hữu -->
+          </div>
+        </div>
+
+        <div
+          class="bg-darkCard border border-darkBorder rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden"
+        >
+          <div
+            class="absolute top-0 right-0 w-64 h-64 bg-brandAccent/5 rounded-full blur-3xl pointer-events-none"
+          ></div>
+          <div class="flex items-start justify-between">
+            <div>
+              <h2 id="detail-title" class="text-2xl sm:text-3xl font-bold">
+                Tên học phần
+              </h2>
+              <p
+                id="detail-author"
+                class="text-xs text-brandAccent font-medium mt-1"
+              >
+                Tác giả: Đang tải...
+              </p>
+            </div>
+            <button
+              onclick="app.shareCurrentProjectLink()"
+              class="px-3.5 py-2 bg-indigo-500/10 border border-indigo-500/30 hover:bg-indigo-500/20 text-indigo-300 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5"
+            >
+              <i class="fa-solid fa-link"></i><span>Sao chép mã chia sẻ</span>
+            </button>
+          </div>
+          <p id="detail-desc" class="text-slate-400 text-sm mt-3">
+            Mô tả học phần...
+          </p>
+          <div
+            class="flex items-center space-x-6 mt-6 pt-6 border-t border-darkBorder text-sm text-slate-400"
+          >
+            <div>
+              <i class="fa-solid fa-layer-group text-brandAccent mr-2"></i
+              ><span id="detail-count">0</span> thẻ câu hỏi
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-3 mt-6">
+            <button
+              onclick="app.startQuizMode()"
+              class="px-5 py-2.5 bg-brandAccent hover:bg-brandHover text-white font-semibold rounded-xl transition shadow-lg shadow-indigo-500/30 flex items-center space-x-2"
+            >
+              <i class="fa-solid fa-gamepad"></i>
+              <span>Luyện tập Trắc nghiệm (Thông minh)</span>
+            </button>
+            <button
+              onclick="app.startFlashcardMode()"
+              class="px-5 py-2.5 bg-darkBorder hover:bg-slate-700 text-white font-semibold rounded-xl transition flex items-center space-x-2"
+            >
+              <i class="fa-solid fa-clone"></i>
+              <span>Học Flashcard</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Danh sách các thẻ bên trong học phần -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold">Danh sách câu hỏi trong học phần</h3>
+            <button
+              id="btn-import-extra"
+              onclick="app.openImportModal()"
+              class="px-3.5 py-2 bg-brandAccent/10 border border-brandAccent/30 hover:bg-brandAccent/20 text-indigo-300 text-sm font-semibold rounded-xl transition flex items-center space-x-2"
+            >
+              <i class="fa-solid fa-file-import"></i>
+              <span>Nhập thêm dữ liệu (Import)</span>
+            </button>
+          </div>
+          <div id="cards-list-container" class="space-y-3">
+            <!-- Render danh sách thẻ -->
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: TRẮC NGHIỆM THỰC CHIẾN (QUIZ MODE) -->
+      <section id="view-quiz" class="hidden max-w-3xl mx-auto space-y-6">
+        <div class="flex items-center justify-between">
+          <button
+            onclick="app.openDetail(app.currentProjectId)"
+            class="text-sm font-medium text-slate-400 hover:text-white flex items-center space-x-2 transition"
+          >
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Thoát luyện tập</span>
+          </button>
+          <div class="text-sm font-semibold text-slate-400">
+            Câu <span id="quiz-current-idx" class="text-white">1</span> /
+            <span id="quiz-total">10</span>
+          </div>
+        </div>
+
+        <div
+          class="w-full bg-darkCard border border-darkBorder h-2 rounded-full overflow-hidden"
+        >
+          <div
+            id="quiz-progress-bar"
+            class="bg-brandAccent h-full transition-all duration-300"
+            style="width: 10%"
+          ></div>
+        </div>
+
+        <div
+          class="bg-darkCard border border-darkBorder rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6"
+        >
+          <div
+            id="quiz-question-text"
+            class="text-lg sm:text-xl font-semibold leading-relaxed"
+          >
+            Nội dung câu hỏi sẽ hiển thị ở đây?
+          </div>
+
+          <div id="quiz-options-container" class="grid grid-cols-1 gap-3">
+            <!-- Render các nút đáp án -->
+          </div>
+
+          <div
+            id="quiz-feedback-box"
+            class="hidden p-4 rounded-xl border text-sm"
+          ></div>
+
+          <div
+            class="flex items-center justify-between pt-4 border-t border-darkBorder"
+          >
+            <button
+              onclick="app.handleDontKnow()"
+              class="text-sm font-medium text-slate-400 hover:text-white transition"
+            >
+              Tôi không biết?
+            </button>
+            <button
+              id="quiz-next-btn"
+              onclick="app.nextQuizQuestion()"
+              class="hidden px-6 py-2.5 bg-brandAccent hover:bg-brandHover text-white font-semibold rounded-xl transition shadow-lg shadow-indigo-500/20"
+            >
+              Câu tiếp theo <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: FLASHCARD MODE -->
+      <section id="view-flashcard" class="hidden max-w-2xl mx-auto space-y-6">
+        <div class="flex items-center justify-between">
+          <button
+            onclick="app.openDetail(app.currentProjectId)"
+            class="text-sm font-medium text-slate-400 hover:text-white flex items-center space-x-2 transition"
+          >
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Thoát flashcard</span>
+          </button>
+          <div class="text-sm font-semibold text-slate-400">
+            Thẻ <span id="fc-current-idx" class="text-white">1</span> /
+            <span id="fc-total">10</span>
+          </div>
+        </div>
+
+        <div
+          onclick="app.flipFlashcard()"
+          class="w-full h-80 bg-darkCard border border-darkBorder rounded-2xl p-8 shadow-2xl cursor-pointer flex flex-col items-center justify-center text-center relative transition transform hover:border-brandAccent/50 group select-none"
+        >
+          <div
+            class="absolute top-4 left-4 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+          >
+            Mặt trước / Mặt sau (Bấm để lật)
+          </div>
+          <div
+            id="fc-content"
+            class="text-xl sm:text-2xl font-medium leading-relaxed"
+          >
+            Nội dung thẻ...
+          </div>
+          <div
+            class="absolute bottom-4 text-xs text-brandAccent opacity-0 group-hover:opacity-100 transition"
+          >
+            <i class="fa-solid fa-rotate mr-1"></i> Nhấn để lật thẻ
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <button
+            onclick="app.prevFlashcard()"
+            class="px-5 py-2.5 bg-darkCard border border-darkBorder hover:bg-darkBorder text-sm font-semibold rounded-xl transition flex items-center space-x-2"
+          >
+            <i class="fa-solid fa-arrow-left"></i><span>Trước</span>
+          </button>
+          <button
+            onclick="app.nextFlashcard()"
+            class="px-5 py-2.5 bg-brandAccent hover:bg-brandHover text-white font-semibold rounded-xl transition flex items-center space-x-2"
+          >
+            <span>Sau</span><i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- MODAL: TẠO / SỬA HỌC PHẦN -->
+    <div
+      id="modal-project"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-darkCard border border-darkBorder w-full max-w-lg rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6"
+      >
+        <div class="flex items-center justify-between">
+          <h3 id="modal-project-title" class="text-xl font-bold">
+            Tạo học phần mới
+          </h3>
+          <button
+            onclick="app.closeModal('modal-project')"
+            class="text-slate-400 hover:text-white text-lg"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label
+              class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5"
+              >Tiêu đề học phần</label
+            >
+            <input
+              type="text"
+              id="input-proj-title"
+              placeholder="Ví dụ: Ôn tập Lịch sử 11"
+              class="w-full bg-darkBg border border-darkBorder rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brandAccent transition"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5"
+              >Mô tả (tùy chọn)</label
+            >
+            <textarea
+              id="input-proj-desc"
+              rows="3"
+              placeholder="Mô tả ngắn..."
+              class="w-full bg-darkBg border border-darkBorder rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brandAccent transition"
+            ></textarea>
+          </div>
+        </div>
+        <div
+          class="flex items-center justify-end space-x-3 pt-4 border-t border-darkBorder"
+        >
+          <button
+            onclick="app.closeModal('modal-project')"
+            class="px-4 py-2 bg-darkBg border border-darkBorder hover:bg-darkBorder text-sm font-medium rounded-xl transition"
+          >
+            Hủy
+          </button>
+          <button
+            onclick="app.saveProject()"
+            class="px-5 py-2 bg-brandAccent hover:bg-brandHover text-white text-sm font-semibold rounded-xl transition shadow-lg shadow-indigo-500/20"
+          >
+            Lưu lên đám mây
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: IMPORT DỮ LIỆU -->
+    <div
+      id="modal-import"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-darkCard border border-darkBorder w-full max-w-2xl rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] flex flex-col"
+      >
+        <div class="flex items-center justify-between flex-shrink-0">
+          <h3 class="text-xl font-bold">Nhập dữ liệu văn bản (Import)</h3>
+          <button
+            onclick="app.closeModal('modal-import')"
+            class="text-slate-400 hover:text-white text-lg"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-darkBg p-4 rounded-xl border border-darkBorder flex-shrink-0 text-sm"
+        >
+          <div>
+            <label class="block font-semibold text-slate-300 mb-2"
+              >Giữa câu hỏi và đáp án</label
+            >
+            <div class="space-y-1.5">
+              <label class="flex items-center space-x-2 cursor-pointer"
+                ><input
+                  type="radio"
+                  name="sep-qa"
+                  value="\t"
+                  class="text-brandAccent"
+                /><span>Tab</span></label
+              >
+              <label class="flex items-center space-x-2 cursor-pointer"
+                ><input
+                  type="radio"
+                  name="sep-qa"
+                  value=","
+                  class="text-brandAccent"
+                /><span>Phẩy</span></label
+              >
+              <label class="flex items-center space-x-2 cursor-pointer"
+                ><input
+                  type="radio"
+                  name="sep-qa"
+                  value="custom"
+                  checked
+                  class="text-brandAccent" /><span>Tùy chỉnh:</span>
+                <input
+                  type="text"
+                  id="custom-sep-qa"
+                  value=" | "
+                  class="bg-darkCard border border-darkBorder rounded px-2 py-0.5 w-20 text-xs"
+              /></label>
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-2"
+              >Giữa các thẻ (Câu hỏi)</label
+            >
+            <div class="space-y-1.5">
+              <label class="flex items-center space-x-2 cursor-pointer"
+                ><input
+                  type="radio"
+                  name="sep-card"
+                  value="newline"
+                  checked
+                  class="text-brandAccent"
+                /><span>Dòng mới</span></label
+              >
+              <label class="flex items-center space-x-2 cursor-pointer"
+                ><input
+                  type="radio"
+                  name="sep-card"
+                  value=";"
+                  class="text-brandAccent"
+                /><span>Chấm phẩy</span></label
+              >
+              <label class="flex items-center space-x-2 cursor-pointer"
+                ><input
+                  type="radio"
+                  name="sep-card"
+                  value="custom"
+                  class="text-brandAccent" /><span>Tùy chỉnh:</span>
+                <input
+                  type="text"
+                  id="custom-sep-card"
+                  value=""
+                  class="bg-darkCard border border-darkBorder rounded px-2 py-0.5 w-20 text-xs"
+              /></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-1 flex flex-col min-h-0">
+          <label
+            class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5 flex-shrink-0"
+            >Dán nội dung vào đây</label
+          >
+          <textarea
+            id="import-text-area"
+            placeholder="Đầu thế kỉ XIX... | Đáp án: A"
+            class="w-full flex-1 bg-darkBg border border-darkBorder rounded-xl p-4 text-sm focus:outline-none focus:border-brandAccent transition font-mono resize-none"
+          ></textarea>
+        </div>
+
+        <div
+          class="flex items-center justify-end space-x-3 pt-4 border-t border-darkBorder flex-shrink-0"
+        >
+          <button
+            onclick="app.closeModal('modal-import')"
+            class="px-4 py-2 bg-darkBg border border-darkBorder hover:bg-darkBorder text-sm font-medium rounded-xl transition"
+          >
+            Hủy
+          </button>
+          <button
+            onclick="app.processImportData()"
+            class="px-5 py-2 bg-brandAccent hover:bg-brandHover text-white text-sm font-semibold rounded-xl transition shadow-lg shadow-indigo-500/20"
+          >
+            Nhập dữ liệu
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: CHIA SẺ VÀ QUẢN LÝ MÃ TÀI KHOẢN -->
+    <div
+      id="modal-share"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-darkCard border border-darkBorder w-full max-w-md rounded-2xl p-6 sm:p-8 shadow-2xl space-y-5"
+      >
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-bold">Mã định danh của bạn</h3>
+          <button
+            onclick="app.closeModal('modal-share')"
+            class="text-slate-400 hover:text-white text-lg"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <p class="text-sm text-slate-400">
+          Mã này dùng để nhận diện tài khoản của bạn trên đám mây QuizTDV.
+        </p>
+        <div>
+          <label
+            class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1"
+            >Mã User ID của bạn:</label
+          >
+          <div class="flex items-center space-x-2">
+            <input
+              type="text"
+              id="my-user-id-display"
+              readonly
+              class="w-full bg-darkBg border border-darkBorder rounded-xl px-3 py-2 text-xs font-mono text-indigo-300"
+            />
+            <button
+              onclick="app.copyMyUserId()"
+              class="px-3 py-2 bg-brandAccent hover:bg-brandHover text-white rounded-xl text-xs font-semibold whitespace-nowrap"
+            >
+              Sao chép
+            </button>
+          </div>
+        </div>
+        <div class="pt-4 border-t border-darkBorder space-y-3">
+          <label
+            class="block text-xs font-semibold uppercase tracking-wider text-slate-400"
+            >Nhập mã học phần được chia sẻ:</label
+          >
+          <div class="flex items-center space-x-2">
+            <input
+              type="text"
+              id="input-import-proj-id"
+              placeholder="Dán mã học phần vào đây..."
+              class="w-full bg-darkBg border border-darkBorder rounded-xl px-3 py-2 text-xs font-mono"
+            />
+            <button
+              onclick="app.loadProjectByShareCode()"
+              class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold whitespace-nowrap"
+            >
+              Tải về
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: HƯỚNG DẪN LƯU VÀ ĐƯA LÊN WEB -->
+    <div
+      id="modal-deploy"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-darkCard border border-darkBorder w-full max-w-2xl rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-indigo-500/10 text-brandAccent flex items-center justify-center text-lg"
+            >
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <h3 class="text-xl font-bold">
+              Cách lưu dự án & Đưa QuizTDV lên web
+            </h3>
+          </div>
+          <button
+            onclick="app.closeModal('modal-deploy')"
+            class="text-slate-400 hover:text-white text-lg"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4 text-sm text-slate-300 leading-relaxed">
+          <div
+            class="bg-darkBg p-4 rounded-xl border border-darkBorder space-y-2"
+          >
+            <h4 class="font-bold text-white flex items-center space-x-2">
+              <span
+                class="w-6 h-6 rounded-full bg-brandAccent text-white text-xs flex items-center justify-center"
+                >1</span
+              ><span>Cách lưu dự án về máy (Backup)</span>
+            </h4>
+            <p class="text-slate-400 text-xs">
+              Vì toàn bộ mã nguồn của trang web này nằm gọn trong **1 file HTML
+              duy nhất**, bạn chỉ cần nhấn nút **Preview** hoặc chuột phải ở
+              code editor -> Chọn lưu hoặc copy toàn bộ nội dung code dán vào
+              một file mới đặt tên là
+              <code class="text-brandAccent">index.html</code> trên máy tính là
+              bạn đã lưu xong toàn bộ dự án.
+            </p>
+          </div>
+
+          <div
+            class="bg-darkBg p-4 rounded-xl border border-darkBorder space-y-2"
+          >
+            <h4 class="font-bold text-white flex items-center space-x-2">
+              <span
+                class="w-6 h-6 rounded-full bg-brandAccent text-white text-xs flex items-center justify-center"
+                >2</span
+              ><span
+                >Cách đưa lên web MIỄN PHÍ để mọi người cùng dùng (GitHub Pages
+                / Vercel)</span
+              >
+            </h4>
+            <ul class="list-disc pl-5 space-y-1 text-slate-400 text-xs">
+              <li>
+                <strong>Bước 1:</strong> Đăng ký tài khoản miễn phí trên
+                <a
+                  href="https://github.com"
+                  target="_blank"
+                  class="text-indigo-400 underline"
+                  >GitHub.com</a
+                >.
+              </li>
+              <li>
+                <strong>Bước 2:</strong> Tạo một Repository mới (kho chứa code)
+                dạng công khai (Public).
+              </li>
+              <li>
+                <strong>Bước 3:</strong> Tải file
+                <code class="text-brandAccent">index.html</code> của ứng dụng
+                lên Repository đó.
+              </li>
+              <li>
+                <strong>Bước 4:</strong> Vào phần <strong>Settings</strong> của
+                Repository -> Chọn mục <strong>Pages</strong> -> Ở phần Build
+                and deployment, chọn nguồn là
+                <strong>Deploy from a branch (main)</strong> rồi nhấn Save.
+              </li>
+              <li>
+                Chỉ sau 1 phút, GitHub sẽ cấp cho bạn một đường link web chính
+                thức (ví dụ:
+                <code class="text-indigo-300"
+                  >https://tenban.github.io/ten-repo</code
+                >). Bạn có thể gửi link này cho bất kỳ ai để vào ôn tập và tạo
+                học phần!
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-4 border-t border-darkBorder">
+          <button
+            onclick="app.closeModal('modal-deploy')"
+            class="px-5 py-2 bg-brandAccent hover:bg-brandHover text-white text-sm font-semibold rounded-xl transition"
+          >
+            Đã hiểu, tuyệt vời!
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIREBASE & APP LOGIC -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+      import {
+        getAuth,
+        signInAnonymously,
+        signInWithCustomToken,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+        updateDoc,
+        deleteDoc,
+        onSnapshot,
+        collection,
+        query,
+        getDocs,
+      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+      class QuizTDVApp {
+        constructor() {
+          this.appId =
+            typeof __app_id !== "undefined"
+              ? __app_id
+              : "quiztdv-study-platform-v1";
+          this.firebaseConfig =
+            typeof __firebase_config !== "undefined"
+              ? JSON.parse(__firebase_config)
+              : {};
+          this.initialToken =
+            typeof __initial_auth_token !== "undefined"
+              ? __initial_auth_token
+              : undefined;
+
+          this.db = null;
+          this.auth = null;
+          this.userId = null;
+
+          this.projects = [];
+          this.currentTab = "my"; // 'my' hoặc 'public'
+          this.currentProjectId = null;
+          this.currentView = "home";
+
+          // Quiz & Flashcard states
+          this.quizQuestions = [];
+          this.quizCurrentIndex = 0;
+          this.quizScore = 0;
+          this.flashcardList = [];
+          this.flashcardIndex = 0;
+          this.isFlashcardFlipped = false;
+
+          this.initFirebase();
+        }
+
+        async initFirebase() {
+          try {
+            const app = initializeApp(this.firebaseConfig);
+            this.db = getFirestore(app);
+            this.auth = getAuth(app);
+
+            if (this.initialToken) {
+              await signInWithCustomToken(this.auth, this.initialToken);
+            } else {
+              await signInAnonymously(this.auth);
+            }
+
+            onAuthStateChanged(this.auth, (user) => {
+              if (user) {
+                this.userId = user.uid;
+                document.getElementById("my-user-id-display").value =
+                  this.userId;
+                this.listenToCloudData();
+              }
+            });
+          } catch (e) {
+            console.error("Firebase init error:", e);
+          }
+        }
+
+        listenToCloudData() {
+          if (!this.userId) return;
+
+          const publicColRef = collection(
+            this.db,
+            "artifacts",
+            this.appId,
+            "public",
+            "data",
+            "projects",
+          );
+          onSnapshot(
+            publicColRef,
+            (snapshot) => {
+              const cloudProjects = [];
+              snapshot.forEach((docSnap) => {
+                cloudProjects.push({ id: docSnap.id, ...docSnap.data() });
+              });
+              this.projects = cloudProjects;
+
+              if (this.projects.length === 0 && this.userId) {
+                this.createDefaultSampleProject();
+              } else {
+                this.renderHome();
+                if (this.currentProjectId && this.currentView === "detail") {
+                  this.openDetail(this.currentProjectId, false);
+                }
+              }
+            },
+            (error) => {
+              console.error("Snapshot error:", error);
+            },
+          );
+        }
+
+        async createDefaultSampleProject() {
+          const sampleId = "proj_sample_history";
+          const sampleData = {
+            title: "Ôn tập Lịch sử 11 - Chương 1 & 2 (QuizTDV)",
+            description:
+              "Bộ câu hỏi mẫu trắc nghiệm chuẩn xác được chia sẻ sẵn.",
+            authorId: this.userId,
+            authorName: "QuizTDV Team",
+            cards: [
+              {
+                id: "c_1",
+                question:
+                  "Đầu thế kỉ XVII, ngành công nghiệp phát triển nhất ở nước Anh là\nA. luyện kim.\nB. máy hơi nước.\nC. len, dạ.\nD. chế tạo máy móc.",
+                answer: "C. len, dạ.",
+              },
+              {
+                id: "c_2",
+                question:
+                  "Chủ nghĩa tư bản hiện đại là thuật ngữ dùng để chỉ chủ nghĩa tư bản từ sau chiến tranh thế giới thứ II đến nay.",
+                answer: "Đúng",
+              },
+            ],
+          };
+          try {
+            const docRef = doc(
+              this.db,
+              "artifacts",
+              this.appId,
+              "public",
+              "data",
+              "projects",
+              sampleId,
+            );
+            await setDoc(docRef, sampleData);
+          } catch (e) {
+            console.error("Create sample error:", e);
+          }
+        }
+
+        switchTab(tab) {
+          this.currentTab = tab;
+          const tabMy = document.getElementById("tab-my");
+          const tabPub = document.getElementById("tab-public");
+          if (tab === "my") {
+            tabMy.className =
+              "px-4 py-2 rounded-xl text-sm font-semibold transition bg-brandAccent text-white shadow-lg shadow-indigo-500/20";
+            tabPub.className =
+              "px-4 py-2 rounded-xl text-sm font-semibold transition bg-darkCard border border-darkBorder text-slate-400 hover:text-white";
+          } else {
+            tabPub.className =
+              "px-4 py-2 rounded-xl text-sm font-semibold transition bg-brandAccent text-white shadow-lg shadow-indigo-500/20";
+            tabMy.className =
+              "px-4 py-2 rounded-xl text-sm font-semibold transition bg-darkCard border border-darkBorder text-slate-400 hover:text-white";
+          }
+          this.renderHome();
+        }
+
+        switchView(viewId) {
+          document.getElementById("view-home").classList.add("hidden");
+          document.getElementById("view-detail").classList.add("hidden");
+          document.getElementById("view-quiz").classList.add("hidden");
+          document.getElementById("view-flashcard").classList.add("hidden");
+
+          document.getElementById(`view-${viewId}`).classList.remove("hidden");
+          this.currentView = viewId;
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        goHome() {
+          this.currentProjectId = null;
+          this.renderHome();
+          this.switchView("home");
+        }
+
+        handleSearch(keyword) {
+          const kw = keyword.toLowerCase().trim();
+          const list = this.getCurrentTabProjects();
+          const filtered = list.filter(
+            (p) =>
+              p.title.toLowerCase().includes(kw) ||
+              (p.description && p.description.toLowerCase().includes(kw)),
+          );
+          this.renderProjectsGrid(filtered);
+        }
+
+        getCurrentTabProjects() {
+          if (!this.userId) return [];
+          if (this.currentTab === "my") {
+            return this.projects.filter((p) => p.authorId === this.userId);
+          } else {
+            return this.projects.filter((p) => p.authorId !== this.userId);
+          }
+        }
+
+        renderHome() {
+          const list = this.getCurrentTabProjects();
+          this.renderProjectsGrid(list);
+        }
+
+        renderProjectsGrid(list) {
+          const grid = document.getElementById("projects-grid");
+          if (list.length === 0) {
+            const msg =
+              this.currentTab === "my"
+                ? "Bạn chưa tạo học phần nào trên đám mây."
+                : "Chưa có học phần nào từ bạn bè/cộng đồng chia sẻ.";
+            grid.innerHTML = `
+                        <div class="col-span-full py-16 text-center text-slate-500 bg-darkCard border border-darkBorder rounded-2xl">
+                            <i class="fa-solid fa-cloud-slash text-4xl mb-3 text-slate-600"></i>
+                            <p class="text-base font-medium">${msg}</p>
+                            <p class="text-sm mt-1">Hãy bấm nút "Tạo học phần" để bắt đầu ngay.</p>
+                        </div>
+                    `;
+            return;
+          }
+
+          grid.innerHTML = list
+            .map(
+              (proj) => `
+                    <div onclick="app.openDetail('${proj.id}')" class="bg-darkCard border border-darkBorder hover:border-brandAccent/50 rounded-2xl p-6 shadow-xl cursor-pointer transition flex flex-col justify-between group">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-2.5 py-1 bg-brandAccent/10 text-indigo-300 text-xs font-semibold rounded-lg">
+                                    ${proj.cards ? proj.cards.length : 0} câu hỏi
+                                </span>
+                                <span class="text-xs text-slate-400 font-mono"><i class="fa-solid fa-user mr-1"></i>${proj.authorId === this.userId ? "Của bạn" : "Cộng đồng"}</span>
+                            </div>
+                            <h3 class="text-lg font-bold group-hover:text-indigo-300 transition line-clamp-1">${this.escapeHtml(proj.title)}</h3>
+                            <p class="text-slate-400 text-sm mt-1.5 line-clamp-2">${this.escapeHtml(proj.description || "Không có mô tả")}</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-darkBorder flex items-center justify-between text-xs text-slate-500">
+                            <span>Nhấn để ôn tập</span>
+                            ${proj.authorId === this.userId ? `<div onclick="event.stopPropagation(); app.deleteProjectPrompt('${proj.id}')" class="hover:text-red-400 p-1"><i class="fa-solid fa-trash"></i></div>` : ""}
+                        </div>
+                    </div>
+                `,
+            )
+            .join("");
+        }
+
+        async openDetail(projId, switchV = true) {
+          this.currentProjectId = projId;
+          const proj = this.projects.find((p) => p.id === projId);
+          if (!proj) return;
+
+          document.getElementById("detail-title").innerText = proj.title;
+          document.getElementById("detail-desc").innerText =
+            proj.description || "Không có mô tả";
+          document.getElementById("detail-author").innerText =
+            `ID Tác giả: ${proj.authorId}`;
+          document.getElementById("detail-count").innerText = proj.cards
+            ? proj.cards.length
+            : 0;
+
+          const isOwner = proj.authorId === this.userId;
+          const actionContainer = document.getElementById(
+            "detail-action-buttons",
+          );
+          const importBtn = document.getElementById("btn-import-extra");
+
+          if (isOwner) {
+            actionContainer.innerHTML = `
+                        <button onclick="app.openEditProjectModal()" class="px-3 py-1.5 bg-darkCard border border-darkBorder hover:bg-darkBorder text-sm font-medium rounded-lg transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-pen-to-square text-slate-400"></i><span>Sửa tên</span>
+                        </button>
+                        <button onclick="app.deleteCurrentProject()" class="px-3 py-1.5 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-sm font-medium rounded-lg transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-trash"></i><span>Xóa</span>
+                        </button>
+                    `;
+            importBtn.classList.remove("hidden");
+          } else {
+            actionContainer.innerHTML = `<span class="text-xs text-slate-400 bg-darkCard border border-darkBorder px-3 py-1.5 rounded-lg">Học phần chia sẻ</span>`;
+            importBtn.classList.add("hidden");
+          }
+
+          this.renderCardsList(proj.cards || [], isOwner);
+          if (switchV) this.switchView("detail");
+        }
+
+        renderCardsList(cards, isOwner) {
+          const container = document.getElementById("cards-list-container");
+          if (cards.length === 0) {
+            container.innerHTML = `<div class="p-6 text-center text-slate-500 bg-darkCard border border-darkBorder rounded-xl text-sm">Học phần chưa có câu hỏi nào.</div>`;
+            return;
+          }
+
+          container.innerHTML = cards
+            .map(
+              (card, idx) => `
+                    <div class="bg-darkCard border border-darkBorder rounded-xl p-4 flex items-start justify-between gap-4">
+                        <div class="space-y-1 flex-1">
+                            <span class="text-xs font-bold text-brandAccent">Câu ${idx + 1}</span>
+                            <div class="text-sm font-medium whitespace-pre-line leading-relaxed">${this.escapeHtml(card.question)}</div>
+                            <div class="text-xs text-emerald-400 font-semibold mt-2 pt-2 border-t border-darkBorder/50">Đáp án: ${this.escapeHtml(card.answer)}</div>
+                        </div>
+                        ${isOwner ? `<button onclick="app.deleteCard('${card.id}')" class="text-slate-500 hover:text-red-400 p-2 transition"><i class="fa-solid fa-trash text-sm"></i></button>` : ""}
+                    </div>
+                `,
+            )
+            .join("");
+        }
+
+        // --- MODALS & CLOUD ACTIONS ---
+        openCreateModal() {
+          document.getElementById("modal-project-title").innerText =
+            "Tạo học phần mới";
+          document.getElementById("input-proj-title").value = "";
+          document.getElementById("input-proj-desc").value = "";
+          this.editingProjectId = null;
+          document.getElementById("modal-project").classList.remove("hidden");
+        }
+
+        openEditProjectModal() {
+          const proj = this.projects.find(
+            (p) => p.id === this.currentProjectId,
+          );
+          if (!proj) return;
+          document.getElementById("modal-project-title").innerText =
+            "Chỉnh sửa học phần";
+          document.getElementById("input-proj-title").value = proj.title;
+          document.getElementById("input-proj-desc").value = proj.description;
+          this.editingProjectId = proj.id;
+          document.getElementById("modal-project").classList.remove("hidden");
+        }
+
+        openImportModal() {
+          document.getElementById("import-text-area").value = "";
+          document.getElementById("modal-import").classList.remove("hidden");
+        }
+
+        openShareModal() {
+          document.getElementById("modal-share").classList.remove("hidden");
+        }
+
+        openDeployGuideModal() {
+          document.getElementById("modal-deploy").classList.remove("hidden");
+        }
+
+        closeModal(modalId) {
+          document.getElementById(modalId).classList.add("hidden");
+        }
+
+        copyMyUserId() {
+          const input = document.getElementById("my-user-id-display");
+          input.select();
+          document.execCommand("copy");
+          alert("Đã sao chép mã định danh của bạn!");
+        }
+
+        shareCurrentProjectLink() {
+          const projId = this.currentProjectId;
+          if (!projId) return;
+          const dummy = document.createElement("textarea");
+          dummy.value = projId;
+          document.body.appendChild(dummy);
+          dummy.select();
+          document.execCommand("copy");
+          document.body.removeChild(dummy);
+          alert(`Đã sao chép mã học phần (${projId})! Gửi mã này cho bạn bè.`);
+        }
+
+        loadProjectByShareCode() {
+          const code = document
+            .getElementById("input-import-proj-id")
+            .value.trim();
+          if (!code) {
+            alert("Vui lòng nhập mã học phần!");
+            return;
+          }
+          const found = this.projects.find((p) => p.id === code);
+          if (found) {
+            this.closeModal("modal-share");
+            this.openDetail(found.id);
+            alert("Đã tải học phần thành công!");
+          } else {
+            alert("Không tìm thấy học phần với mã này trên đám mây.");
+          }
+        }
+
+        async saveProject() {
+          const title = document
+            .getElementById("input-proj-title")
+            .value.trim();
+          const desc = document.getElementById("input-proj-desc").value.trim();
+          if (!title) {
+            alert("Vui lòng nhập tiêu đề học phần!");
+            return;
+          }
+
+          if (this.editingProjectId) {
+            const proj = this.projects.find(
+              (p) => p.id === this.editingProjectId,
+            );
+            if (proj) {
+              proj.title = title;
+              proj.description = desc;
+              const docRef = doc(
+                this.db,
+                "artifacts",
+                this.appId,
+                "public",
+                "data",
+                "projects",
+                proj.id,
+              );
+              await updateDoc(docRef, { title, description: desc });
+            }
+          } else {
+            const newProjId = "proj_" + Date.now();
+            const newProj = {
+              id: newProjId,
+              title: title,
+              description: desc,
+              authorId: this.userId,
+              cards: [],
+            };
+            const docRef = doc(
+              this.db,
+              "artifacts",
+              this.appId,
+              "public",
+              "data",
+              "projects",
+              newProjId,
+            );
+            await setDoc(docRef, newProj);
+            this.currentProjectId = newProjId;
+          }
+
+          this.closeModal("modal-project");
+          if (this.currentProjectId) {
+            this.openDetail(this.currentProjectId);
+          } else {
+            this.goHome();
+          }
+        }
+
+        async deleteProjectPrompt(projId) {
+          if (
+            confirm(
+              "Bạn có chắc chắn muốn xóa học phần này trên đám mây không?",
+            )
+          ) {
+            try {
+              const docRef = doc(
+                this.db,
+                "artifacts",
+                this.appId,
+                "public",
+                "data",
+                "projects",
+                projId,
+              );
+              await deleteDoc(docRef);
+              this.goHome();
+            } catch (e) {
+              console.error("Delete error:", e);
+            }
+          }
+        }
+
+        deleteCurrentProject() {
+          if (this.currentProjectId) {
+            this.deleteProjectPrompt(this.currentProjectId);
+          }
+        }
+
+        async deleteCard(cardId) {
+          const proj = this.projects.find(
+            (p) => p.id === this.currentProjectId,
+          );
+          if (!proj) return;
+          proj.cards = proj.cards.filter((c) => c.id !== cardId);
+
+          try {
+            const docRef = doc(
+              this.db,
+              "artifacts",
+              this.appId,
+              "public",
+              "data",
+              "projects",
+              proj.id,
+            );
+            await updateDoc(docRef, { cards: proj.cards });
+            this.openDetail(proj.id, false);
+          } catch (e) {
+            console.error("Delete card error:", e);
+          }
+        }
+
+        async processImportData() {
+          const text = document.getElementById("import-text-area").value.trim();
+          if (!text) {
+            alert("Vui lòng nhập nội dung văn bản!");
+            return;
+          }
+
+          const qaSepRadio = document.querySelector(
+            'input[name="sep-qa"]:checked',
+          ).value;
+          let qaSep = " | ";
+          if (qaSepRadio === "\\t") qaSep = "\t";
+          else if (qaSepRadio === ",") qaSep = ",";
+          else if (qaSepRadio === "custom")
+            qaSep = document.getElementById("custom-sep-qa").value || " | ";
+
+          const cardSepRadio = document.querySelector(
+            'input[name="sep-card"]:checked',
+          ).value;
+          let cardSep = "\n";
+          if (cardSepRadio === ";") cardSep = ";";
+          else if (cardSepRadio === "custom")
+            cardSep = document.getElementById("custom-sep-card").value || "\n";
+
+          let rawCards =
+            cardSepRadio === "newline"
+              ? text.split(/\r?\n/)
+              : text.split(cardSep);
+          const proj = this.projects.find(
+            (p) => p.id === this.currentProjectId,
+          );
+          if (!proj) return;
+
+          if (!proj.cards) proj.cards = [];
+
+          let addedCount = 0;
+          rawCards.forEach((item) => {
+            const line = item.trim();
+            if (!line) return;
+            const parts = line.split(qaSep);
+            if (parts.length >= 2) {
+              const question = parts[0].trim();
+              const answer = parts.slice(1).join(qaSep).trim();
+              proj.cards.push({
+                id: "card_" + Math.random().toString(36).substring(2, 9),
+                question: question,
+                answer: answer,
+              });
+              addedCount++;
+            }
+          });
+
+          try {
+            const docRef = doc(
+              this.db,
+              "artifacts",
+              this.appId,
+              "public",
+              "data",
+              "projects",
+              proj.id,
+            );
+            await updateDoc(docRef, { cards: proj.cards });
+            this.closeModal("modal-import");
+            this.openDetail(proj.id, false);
+            alert(`Đã nhập thành công ${addedCount} câu hỏi lên đám mây!`);
+          } catch (e) {
+            console.error("Import cloud error:", e);
+          }
+        }
+
+        // --- TRẮC NGHIỆM THÔNG MINH (ROBUST ALGORITHM) ---
+        startQuizMode() {
+          const proj = this.projects.find(
+            (p) => p.id === this.currentProjectId,
+          );
+          if (!proj || !proj.cards || proj.cards.length === 0) {
+            alert("Học phần chưa có câu hỏi nào để luyện tập!");
+            return;
+          }
+
+          this.quizQuestions = JSON.parse(JSON.stringify(proj.cards));
+          this.shuffleArray(this.quizQuestions);
+          this.quizCurrentIndex = 0;
+          this.quizScore = 0;
+
+          this.switchView("quiz");
+          this.loadQuizQuestion();
+        }
+
+        loadQuizQuestion() {
+          if (this.quizCurrentIndex >= this.quizQuestions.length) {
+            this.showQuizResult();
+            return;
+          }
+
+          const currentCard = this.quizQuestions[this.quizCurrentIndex];
+          document.getElementById("quiz-current-idx").innerText =
+            this.quizCurrentIndex + 1;
+          document.getElementById("quiz-total").innerText =
+            this.quizQuestions.length;
+
+          const percent =
+            ((this.quizCurrentIndex + 1) / this.quizQuestions.length) * 100;
+          document.getElementById("quiz-progress-bar").style.width =
+            `${percent}%`;
+
+          document.getElementById("quiz-feedback-box").classList.add("hidden");
+          document.getElementById("quiz-next-btn").classList.add("hidden");
+
+          const parsed = this.parseQuestionAndOptions(
+            currentCard.question,
+            currentCard.answer,
+          );
+          document.getElementById("quiz-question-text").innerText =
+            parsed.questionText;
+
+          const optionsContainer = document.getElementById(
+            "quiz-options-container",
+          );
+          optionsContainer.innerHTML = "";
+
+          parsed.options.forEach((optText, optIdx) => {
+            const btn = document.createElement("button");
+            btn.className =
+              "w-full text-left p-4 rounded-xl border border-darkBorder bg-darkBg hover:border-brandAccent/60 hover:bg-slate-800/80 transition flex items-center justify-between text-sm sm:text-base font-medium group";
+            btn.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <span class="w-7 h-7 rounded-lg bg-darkCard border border-darkBorder flex items-center justify-center text-xs font-bold text-slate-400 group-hover:border-brandAccent group-hover:text-brandAccent">${String.fromCharCode(65 + optIdx)}</span>
+                            <span>${this.escapeHtml(optText)}</span>
+                        </div>
+                    `;
+            btn.onclick = () =>
+              this.handleSelectAnswer(
+                optIdx,
+                optText,
+                parsed.correctAnswer,
+                parsed.options,
+              );
+            optionsContainer.appendChild(btn);
+          });
+
+          this.currentParsedQuiz = parsed;
+        }
+
+        parseQuestionAndOptions(rawQuestion, rawAnswer) {
+          const lines = rawQuestion.split("\n");
+          let mainQuestionLines = [];
+          let extractedOptions = [];
+          let isOptionLine = false;
+
+          lines.forEach((line) => {
+            const trimmed = line.trim();
+            // Nhận diện dòng bắt đầu bằng A., B., C., D. hoặc a), b), c), d)
+            if (/^[A-Da-d][\.\)]/.test(trimmed)) {
+              isOptionLine = true;
+              extractedOptions.push(trimmed.substring(2).trim());
+            } else {
+              if (!isOptionLine) {
+                mainQuestionLines.push(line);
+              } else {
+                if (extractedOptions.length > 0) {
+                  extractedOptions[extractedOptions.length - 1] +=
+                    " " + trimmed;
+                }
+              }
+            }
+          });
+
+          const questionText =
+            mainQuestionLines.join("\n").trim() || rawQuestion;
+
+          if (extractedOptions.length >= 2) {
+            let correctOptText = "";
+            const cleanAns = rawAnswer.trim();
+            const firstChar = cleanAns.charAt(0).toUpperCase();
+            if (
+              ["A", "B", "C", "D"].includes(firstChar) &&
+              (cleanAns.charAt(1) === "." || cleanAns.length === 1)
+            ) {
+              const idx = firstChar.charCodeAt(0) - 65;
+              correctOptText =
+                extractedOptions[idx] || cleanAns.substring(2).trim();
+            } else {
+              correctOptText = cleanAns;
+            }
+
+            // Xáo trộn vị trí độc lập cho từng câu hỏi
+            const shuffledOptions = [...extractedOptions];
+            this.shuffleArray(shuffledOptions);
+
+            return {
+              questionText: questionText,
+              options: shuffledOptions,
+              correctAnswer: correctOptText,
+            };
+          } else {
+            let options = ["Đúng", "Sai"];
+            return {
+              questionText: rawQuestion,
+              options: options,
+              correctAnswer: rawAnswer.trim(),
+            };
+          }
+        }
+
+        handleSelectAnswer(optIdx, chosenText, correctAnswer, allOptions) {
+          const buttons = document
+            .getElementById("quiz-options-container")
+            .querySelectorAll("button");
+          buttons.forEach((b) => (b.disabled = true));
+
+          const isCorrect =
+            chosenText.toLowerCase() === correctAnswer.toLowerCase() ||
+            (chosenText.toLowerCase().includes(correctAnswer.toLowerCase()) &&
+              correctAnswer.length > 3);
+
+          const feedbackBox = document.getElementById("quiz-feedback-box");
+          feedbackBox.classList.remove("hidden");
+
+          if (isCorrect) {
+            this.quizScore++;
+            feedbackBox.className =
+              "p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-sm font-semibold flex items-center space-x-2";
+            feedbackBox.innerHTML = `<i class="fa-solid fa-circle-check text-lg"></i><span>Chính xác!</span>`;
+            buttons[optIdx].className =
+              "w-full text-left p-4 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white transition flex items-center justify-between text-sm sm:text-base font-medium";
+          } else {
+            feedbackBox.className =
+              "p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 text-sm font-semibold flex items-center space-x-2";
+            feedbackBox.innerHTML = `<i class="fa-solid fa-circle-xmark text-lg"></i><span>Đáp án đúng là: <b>${this.escapeHtml(correctAnswer)}</b></span>`;
+            buttons[optIdx].className =
+              "w-full text-left p-4 rounded-xl border border-red-500 bg-red-500/20 text-white transition flex items-center justify-between text-sm sm:text-base font-medium";
+
+            buttons.forEach((b, i) => {
+              if (
+                allOptions[i].toLowerCase() === correctAnswer.toLowerCase() ||
+                allOptions[i]
+                  .toLowerCase()
+                  .includes(correctAnswer.toLowerCase())
+              ) {
+                b.className =
+                  "w-full text-left p-4 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white transition flex items-center justify-between text-sm sm:text-base font-medium";
+              }
+            });
+          }
+
+          document.getElementById("quiz-next-btn").classList.remove("hidden");
+        }
+
+        handleDontKnow() {
+          const correctAnswer = this.currentParsedQuiz.correctAnswer;
+          const buttons = document
+            .getElementById("quiz-options-container")
+            .querySelectorAll("button");
+          buttons.forEach((b) => (b.disabled = true));
+
+          const feedbackBox = document.getElementById("quiz-feedback-box");
+          feedbackBox.classList.remove("hidden");
+          feedbackBox.className =
+            "p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 text-sm font-semibold flex items-center space-x-2";
+          feedbackBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-lg"></i><span>Đáp án đúng là: <b>${this.escapeHtml(correctAnswer)}</b></span>`;
+
+          buttons.forEach((b, i) => {
+            if (
+              this.currentParsedQuiz.options[i].toLowerCase() ===
+              correctAnswer.toLowerCase()
+            ) {
+              b.className =
+                "w-full text-left p-4 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white transition flex items-center justify-between text-sm sm:text-base font-medium";
+            }
+          });
+
+          document.getElementById("quiz-next-btn").classList.remove("hidden");
+        }
+
+        nextQuizQuestion() {
+          this.quizCurrentIndex++;
+          this.loadQuizQuestion();
+        }
+
+        showQuizResult() {
+          const total = this.quizQuestions.length;
+          const percent = Math.round((this.quizScore / total) * 100);
+          const quizSec = document.getElementById("view-quiz");
+          quizSec.innerHTML = `
+                    <div class="max-w-md mx-auto bg-darkCard border border-darkBorder rounded-2xl p-8 text-center space-y-6 shadow-2xl">
+                        <div class="w-20 h-20 bg-brandAccent/10 rounded-full flex items-center justify-center mx-auto text-brandAccent text-3xl shadow-inner">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold">Hoàn thành bài luyện tập!</h2>
+                            <p class="text-slate-400 text-sm mt-1">Đúng <span class="text-white font-bold">${this.quizScore}</span> / ${total} câu (${percent}%).</p>
+                        </div>
+                        <div class="flex flex-col space-y-3 pt-4 border-t border-darkBorder">
+                            <button onclick="app.startQuizMode()" class="w-full py-3 bg-brandAccent hover:bg-brandHover text-white font-semibold rounded-xl transition">Luyện tập lại</button>
+                            <button onclick="app.openDetail(app.currentProjectId)" class="w-full py-3 bg-darkBg border border-darkBorder hover:bg-darkBorder font-semibold rounded-xl transition">Quay lại</button>
+                        </div>
+                    </div>
+                `;
+        }
+
+        // --- FLASHCARD MODE ---
+        startFlashcardMode() {
+          const proj = this.projects.find(
+            (p) => p.id === this.currentProjectId,
+          );
+          if (!proj || !proj.cards || proj.cards.length === 0) {
+            alert("Học phần chưa có thẻ flashcard nào!");
+            return;
+          }
+          this.flashcardList = JSON.parse(JSON.stringify(proj.cards));
+          this.flashcardIndex = 0;
+          this.isFlashcardFlipped = false;
+
+          this.switchView("flashcard");
+          this.renderFlashcard();
+        }
+
+        renderFlashcard() {
+          document.getElementById("fc-current-idx").innerText =
+            this.flashcardIndex + 1;
+          document.getElementById("fc-total").innerText =
+            this.flashcardList.length;
+
+          const card = this.flashcardList[this.flashcardIndex];
+          const contentEl = document.getElementById("fc-content");
+
+          if (!this.isFlashcardFlipped) {
+            contentEl.innerText = card.question;
+            contentEl.className =
+              "text-xl sm:text-2xl font-medium leading-relaxed text-slate-100";
+          } else {
+            contentEl.innerText = card.answer;
+            contentEl.className =
+              "text-xl sm:text-2xl font-semibold leading-relaxed text-emerald-400";
+          }
+        }
+
+        flipFlashcard() {
+          this.isFlashcardFlipped = !this.isFlashcardFlipped;
+          this.renderFlashcard();
+        }
+
+        nextFlashcard() {
+          this.isFlashcardFlipped = false;
+          this.flashcardIndex =
+            (this.flashcardIndex + 1) % this.flashcardList.length;
+          this.renderFlashcard();
+        }
+
+        prevFlashcard() {
+          this.isFlashcardFlipped = false;
+          this.flashcardIndex =
+            (this.flashcardIndex - 1 + this.flashcardList.length) %
+            this.flashcardList.length;
+          this.renderFlashcard();
+        }
+
+        shuffleArray(array) {
+          for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+          }
+          return array;
+        }
+
+        escapeHtml(str) {
+          if (!str) return "";
+          return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        }
+      }
+
+      window.app = new QuizTDVApp();
+    </script>
+  </body>
+</html>
